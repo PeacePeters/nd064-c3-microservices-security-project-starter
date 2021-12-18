@@ -10,7 +10,8 @@ Checking our cluster monitoring dashboard, there was a significant increase in C
 This is due to the crypto miners being initiated. Usually, crypto-mining consumes a lot of CPU and it is undesirable to have these crypto-mining pods running on our system.
 
 5. Summary of the remediation steps:
-Evicting the intruding pods from our system and checking our monitoring dashboard for CPU utilization, which should be back to normal.
+   A. Evicting the intruding pods from our system. 
+   B. Checking our monitoring dashboard for CPU utilization, which was be back to normal.
 We ran the following commands to evict the pods:
 `kubectl get pod` to find the overloading pods
 `kubeclt delete pod <pod_name> --grace-period=0 --force` to delete the pods.
