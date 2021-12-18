@@ -1,0 +1,12 @@
+# Kubernetes-specifics Operational Test Plan for Hardening
+We hardened the weaknesses on kubernetes attack surfaces by using kube-bench to get the failed findings, and then address those findings with the aid of Rancher benchmark assessment pdf. 
+To test these changes, we will define a hardening test plan that focuses on the stability of the cluster. Our primary goal is to avoid an outage and undesired consequences. 
+
+key points of the test plan are as follow:
+How will you test the changes?
+The changes will be tested in a non-production environment like a test cluster, with close coordination with other teams.
+
+How will you ensure the changes don't negatively affect your cluster?
+The changes will be tested in a non-production cluster that is representative of our production. We can apply canary testing to see how it is work under heavy traffic in a staging environment, and to ensure there are no unintended consequences or regressions.
+Once the change is applied, we will ensure the stability of our cluster by closely monitoring metrics for regressions using observability and monitoring techniques like Prometheus and Grafana. 
+Additionally, the change can be rolled out incrementally to a percentage of traffic using a load balancer.
