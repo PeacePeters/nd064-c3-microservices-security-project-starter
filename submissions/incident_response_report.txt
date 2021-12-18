@@ -1,6 +1,6 @@
 1. Incident commander name: Peace Peters
 2. Executive Summary of what happened:
-Three pods running three different crypto miners minergate, moneropool, and xmrpooldotnet were launched.
+Three pods running three different crypto miners - minergate, moneropool, and xmrpooldotnet were launched.
 
 3. Summary of what was affected:
 Cluster was controlled by the attacker who had access to administrative terminal, thereby running crypto-mining containers with the aim of abusing compute resources.
