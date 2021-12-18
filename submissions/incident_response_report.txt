@@ -16,5 +16,6 @@ We ran the following commands to evict the pods:
 `kubeclt delete pod <pod_name> --grace-period=0 --force` to delete the pods.
 
 6. Summary of lessons learned:
-Admission controllers should be used to only allow certain images from being imported and started up on the containers within the pods.
-An alert system should also be implemented alongside good monitoring of security events.
+   a. Access to the Kubernetes API server from administrative terminals and the Grafana dashboards should be reviewed.
+   b. Admission controllers should be used to only allow certain images from being imported and started up on the containers within the pods.
+   c. An alert system should also be implemented alongside good monitoring of security events.
