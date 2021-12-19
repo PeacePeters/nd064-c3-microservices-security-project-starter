@@ -1,0 +1,66 @@
+# Docker Threat Modeling
+Given Docker's system components and the STRIDE framework, the five potential threats that may arise are as follows:
+
+Docker desktop compromise (Docker Client)
+Spoofing - Docker desktop can be compromised when client traffic from the Docker client to the Docker daemon is spoofed or intercepted by an attacker. 
+By default, the client and daemon communicate using a non-encrypted unit socket.
+Mitigation - Transport Layer Security Certificate Authority (TLS) can be implemented to secure communication affecting the client.
+
+Dockerfile misconfiguration (Docker Client)
+Elevation of Privilege - when a Dockerfile does not specify a user, and is ran using the root credential, this could impact client authorization leading to client authorization abuse. 
+This will then impact Dockerfile as it could be tampered with once authorization level is abused.
+Mitigation - Run the latest patched version of the Docker client.
+           - Ensure auditing is configured for docker files and directories in order to collect and analyze Docker client logs.
+
+Image security (Image Registry)
+Spoofing - An image may be spoofed with malicious images or libraries as part of the container layers, which affects image security.
+Mitigation - Ensure Docker Content Trust (DCT) is enable in order to digitally sign the image.
+
+Daemon misconfiguration (Docker Host)
+Tampering - Daemon configuration may be tampered with by a compromised client, leading to misconfiguration. TLS Certificate Authority (TLS CA) provided by Docker should be protected from any tampering.
+Mitigation - Ensure the TLS CA file is individually owned and group-owned by root to ensure that it cannot be modified by less privileged users. 
+           - Audit all Docker daemon activities. 
+
+Docker container (Docker Host)
+Denial of Service - By default, a container can use all of the memory on the host. As such, Daemon memory for the running container may be over-allocated, leading to a misconfiguration.
+Mitigation - Use memory limit mechanisms to prevent a denial of service from occurring.
+
+
+# Kubernetes Threat Modeling with STRIDE
+Given Kubernetes' system components and the STRIDE framework, the five potential threats that may arise are as follows:
+
+kube-apiserver (Control Plane)
+Spoofing - The API server handles all API calls to the server. As such, a malicious caller could spoof calls to the API server which in turn affects authenticity. 
+For example, the default CAP_NET_RAW permissions that all pods have, allow the pods to open raw sockets and inject malicious packets into the Kubernetes container network, which may lead to spoofing.
+Mitigation - All calls to the API server should be over Transport Layer Security (TLS), and ensure that anonymous and basic authentication are not used to the kube-apiserver.
+
+etcd (Control Plane)
+Tampering - Etcd is a consistent and highly available key-value store that stores all the configuration data for the cluster. 
+An attacker may tamper with the configuration of etcd, thereby modifying vital system-level configurations such as pod specs. This affects integrity. Compromising etcd gives a malicious caller full control.
+Mitigation- Restricting permissions on etcd files such as /etc/kubernetes/manifests/etcd.yaml to Unix permission 644 or more restrictive. Also ensure the pod spec file is set to root ownership per etcd.
+
+kubelet (Worker Node Runtime)
+Repudiation - kubelet is an agent that runs on each node in the cluster and ensures containers are running in a pod. 
+Unauthorized changes can be made to kubelet and since kubernetes natively doesn't allow certificate revocation, this could lead to repudiation if a certificate cannot be revoked when necessary. This affects non-repudiation
+Mitigation - kubelet authorization should only be TLS and weak/basic authentication should be disallowed. Also, make sure hostnames are not overridden, which makes it possible to disassociate logs from kubelet.
+
+kube-proxy (Worker Node Runtime)
+Information Disclosure - kube-proxy is a network proxy that runs on each node in the cluster, maintaining network rules on nodes. Information disclosure can happen when kube-proxy exposes sensitive information. This affects confidentiality.
+Mitigation - Set permissions on --kubeconfig to 644 or less permissive.
+
+kube-scheduler (Control Plane)
+Denial of Service - kube-scheduler is a high bandwidth scheduler that watches for newly created pods with no assigned node and selects a node for them to run on. 
+kube-scheduler can incorrectly schedule the pod. Conflict may arise due to kube-scheduler incorrectly scheduling the pod and since kubernetes ships without an upper limit for setting the memory footprint, this leads to a denial of service which could result in exhausting resources needed to run the pod. 
+This affects availability.
+
+Docker-bench Run Results and Analysis
+Finding 1.1.4 - Ensure auditing is configured for Docker files and directories
+This finding is chosen so as to collect and analyze Docker client logs. These are important to look at because they tell us whether an application is requesting to, for example, open a file, write to a file, read from a file, etc. With this, elevation of privilege threat arising from Dockerfile misconfiguration can be addressed.
+
+Finding 4.5 - Ensure Content trust for Docker is Enabled
+Docker Content Trust is an anti-spoofing control that provides the ability to digitally sign our images sent to Docker Registry. These signatures allow client-side verification of the
+identity of the publisher of specific image tags and ensures the provenance of container
+images.
+
+Finding 1.1.3 - Ensure auditing is configured for Docker daemon
+Docker daemon runs with root privileges which makes it very important to audit its activities and usage. By collecting and analyzing audit logs, we will be able to address daemon misconfiguration on Docker host.
